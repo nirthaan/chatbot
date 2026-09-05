@@ -1,83 +1,58 @@
-# Python AI Chatbot
+# Groq Chatbot
 
-A lightweight conversational AI assistant built with Python, LangChain, LangGraph, and Groq. The app allows users to chat with an LLM and invoke simple custom tools like a calculator and greeting function.
+A lightweight Streamlit chatbot built with Python, LangChain, LangGraph, and Groq. The app lets you chat with a Groq-hosted model and use small custom tools such as a calculator and a greeting helper.
 
 ## Overview
 
-This project creates a ReAct-style agent that:
+This project creates a browser-based ReAct-style agent that:
 
-- accepts text input from the user,
-- sends it to a Groq-hosted language model,
-- decides whether to use available tools,
-- and returns a response in the terminal.
+- accepts chat messages from the user,
+- sends them to a Groq model through LangChain,
+- decides whether a registered tool should be used,
+- and returns the result in a Streamlit chat UI.
 
-It is ideal for learning how to build a tool-using AI agent with a small, practical example.
+It is a simple example of an AI agent that can reason and call tools in a real web app.
 
 ## Features
 
-- Command-line chat interface
-- Groq model integration via LangChain
-- Tool calling with:
+- Streamlit chat interface
+- Groq model integration using `langchain-groq`
+- ReAct agent created with `langgraph`
+- Built-in tools:
   - calculator
-  - say_hello
-- Environment-based configuration through a `.env` file
-- Simple and easy-to-extend architecture
+  - greeting
+- Tool controls available from the `+` popover in the UI
+- Environment-based configuration via `.env` or Streamlit secrets
+- Message history stored in `st.session_state`
 
-## Architecture
+## App Behavior
 
-```mermaid
-flowchart TD
-    A[User Input] --> B[main.py]
-    B --> C[Environment Configuration<br/>load_dotenv()]
-    B --> D[Tool Definitions<br/>calculator(), say_hello()]
-    B --> E[Interactive Loop<br/>while True]
+The current app does the following:
 
-    E --> F[LangChain]
-    F --> G[ChatGroq<br/>Groq Model]
-    E --> H[LangGraph]
-    H --> I[ReAct Agent<br/>create_react_agent()]
-
-    G --> I
-    D --> I
-
-    I --> J[Groq LLM API]
-    J --> K[Agent Response]
-    K --> L[Terminal Output]
-
-    I --> M{Tool Call Needed?}
-    M -->|Yes| D
-    M -->|No| K
-```
-
-This project follows a ReAct-style agent flow:
-
-1. The user enters input in the terminal.
-2. `main.py` loads environment variables and initializes the Groq model.
-3. The app registers custom tools such as the calculator and greeting tool.
-4. LangGraph creates a ReAct agent that can reason and decide whether a tool should be used.
-5. The model responds through the Groq API and prints the result back to the terminal.
-
-### Main components
-
-- `main.py`: application entry point
-- `requirements.txt`: Python dependencies
-- `.env`: holds the Groq API key and model configuration
-- `.venv`: local virtual environment used for project dependencies
+1. Loads environment variables using `python-dotenv`.
+2. Retrieves the Groq API key from either `.env` or `st.secrets`.
+3. Creates a ReAct agent with the selected Groq model.
+4. Registers custom tools for arithmetic and greetings.
+5. Displays a chat interface with a `+` button for direct tool use.
+6. Sends user prompts to the agent and renders the model response in the chat.
 
 ## Project Structure
 
 ```text
-project/
-├── .env
-├── .venv/
+groq_chatbot_project/
 ├── main.py
 ├── requirements.txt
-└── README.md
+├── README.md
+├── .env                  # optional local environment file
+├── .streamlit/
+│   └── secrets.toml      # optional Streamlit secrets file
+└── .venv/                # optional local virtual environment
 ```
 
-## Technologies Used
+## Tech Stack
 
-- Python 3
+- Python
+- Streamlit
 - LangChain Core
 - LangChain Groq
 - LangGraph
@@ -85,107 +60,112 @@ project/
 
 ## Prerequisites
 
-Before running the project, ensure you have:
+Before running the app, make sure you have:
 
 - Python 3.10 or newer
 - A Groq API key
-- Access to the terminal / PowerShell
+- Access to a terminal or PowerShell
 
-## Step-by-Step Setup with `.venv`
+## Setup
 
 ### 1. Open PowerShell in the project folder
 
 ```powershell
-cd c:\abhi\preoject
+cd c:\abhi\groq_chatbot_project
 ```
 
-### 2. Create a virtual environment
+### 2. Create and activate a virtual environment
 
 ```powershell
 py -3 -m venv .venv
-```
-
-### 3. Activate the virtual environment
-
-```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-If PowerShell blocks script execution, run this once in the current terminal:
+If PowerShell blocks script execution, run this once first:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
-Then activate again:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-### 4. Upgrade pip
+### 3. Install dependencies
 
 ```powershell
 python -m pip install --upgrade pip
-```
-
-### 5. Install dependencies
-
-```powershell
 pip install -r requirements.txt
 ```
 
-### 6. Create a `.env` file
+### 4. Add your Groq credentials
 
-Create a file named `.env` in the project root with the following contents:
+Create a `.env` file in the project root:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 GROQ_MODEL=qwen/qwen3.6-27b
 ```
 
-You can replace the model value with any Groq-supported model you prefer.
+You can also configure the same values in Streamlit secrets if you are deploying through Streamlit Cloud:
 
-### 7. Run the chatbot
+```toml
+GROQ_API_KEY = "your_groq_api_key_here"
+GROQ_MODEL = "qwen/qwen3.6-27b"
+```
+
+## Run the App
 
 ```powershell
-python main.py
+streamlit run main.py
 ```
 
-## Example Usage
+Then open the local URL shown in the terminal in your browser.
 
-Once the app starts, you can type prompts like:
+## Using the App
+
+You can:
+
+- type a normal chat message in the input box,
+- use the `+` popover to run the calculator or greeting tools,
+- ask questions that may trigger the available tools automatically.
+
+### Example prompts
 
 ```text
-You: What is 12 + 8?
-You: Hello Alice
-You: Tell me a joke
+What is 12 + 8?
+Hello Alice
+Can you greet my friend Sam?
 ```
 
-The assistant will respond using the Groq model and may call the registered tools when needed.
+The assistant will use the Groq model and may call the registered tools when needed.
 
-## Exit the Program
+## Tool Details
 
-Type:
+### Calculator
 
-```text
-quit
-```
+The calculator tool accepts two numeric inputs and returns the sum.
 
-to exit the chatbot.
+### Greeting
+
+The greeting tool accepts a name and returns a friendly greeting string.
+
+## Deployment Notes
+
+For Streamlit Community Cloud:
+
+1. Push `main.py`, `requirements.txt`, and `README.md` to GitHub.
+2. Do not commit your local `.env` file.
+3. Add your Groq secrets in the app settings.
+4. Set the main file to `main.py`.
 
 ## Notes
 
-- The project loads environment variables from `.env` using `python-dotenv`.
-- If `GROQ_API_KEY` is missing, the app prints a warning but will still try to run depending on the environment.
-- The current tool set is intentionally simple, making the project a good starting point for more advanced agent workflows.
+- If `GROQ_API_KEY` is missing, the app shows an error and stops before starting the chat.
+- The app checks both `.env` values and `st.secrets`, which makes it easy to run locally or deploy in the cloud.
+- The tool set is intentionally small and can be expanded by adding more LangChain tools.
 
-## Future Enhancements
+## Future Improvements
 
-Possible improvements include:
+Possible enhancements include:
 
-- adding more tools such as search, file reading, or weather APIs,
-- supporting web requests,
-- adding a web UI,
-- logging conversations,
-- improving error handling and model configuration.
+- more tools such as weather, search, or file access,
+- better error handling and validation,
+- conversation logging,
+- richer UI elements and more agent capabilities.
